@@ -6,7 +6,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <input id="mode" className="mode-box" type="checkbox" />
         <header className="site-header">
-          <a className="brand" href="/">Product Guides</a>
+          <a className="brand" href="/">HomeSafeMart</a>
           <nav>
             <a href="/products">Products</a>
             <a href="/deals">Deals</a>
@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </nav>
         </header>
         <main>{children}</main>
-        <footer className="footer">Editorial storefront starter.</footer>
+        <footer className="footer">HomeSafeMart publishes helpful buying guides and product comparisons. As an affiliate site, we may earn from qualifying purchases.</footer>
       </body>
     </html>
   );
