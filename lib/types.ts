@@ -12,6 +12,9 @@ export type Product = {
   cons: string[];
   asin?: string;
   sourceUrl?: string;
+  affiliateNetwork?: "amazon" | "impact" | "custom";
+  affiliateProgramId?: string;
+  merchant?: string;
   createdAt?: string;
 };
 
@@ -24,6 +27,10 @@ export type Article = {
   productSlugs: string[];
   seoTitle?: string;
   seoDescription?: string;
+  status?: "draft" | "published";
+  shopifyArticleId?: string;
+  canonicalUrl?: string;
+  publishedAt?: string;
   createdAt?: string;
 };
 

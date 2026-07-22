@@ -1,5 +1,6 @@
 import { getProducts } from "@/lib/store";
 import { ProductCard } from "@/components/ProductCard";
+import { AffiliateDisclosure } from "@/components/AffiliateDisclosure";
 
 export default async function DealsPage() {
   const products = await getProducts();
@@ -13,6 +14,7 @@ export default async function DealsPage() {
       <section className="grid section pt0">
         {products.map((product) => <ProductCard key={product.slug} product={product} />)}
       </section>
+      <section className="section pt0"><AffiliateDisclosure /></section>
     </div>
   );
 }

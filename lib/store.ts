@@ -36,6 +36,9 @@ export async function saveProduct(input: Partial<Product>) {
     cons: input.cons || [],
     asin: input.asin,
     sourceUrl: input.sourceUrl,
+    affiliateNetwork: input.affiliateNetwork || "amazon",
+    affiliateProgramId: input.affiliateProgramId,
+    merchant: input.merchant,
     createdAt: input.createdAt || new Date().toISOString()
   };
   const db = await getDb();
@@ -69,6 +72,10 @@ export async function saveArticle(input: Partial<Article>) {
     productSlugs: input.productSlugs || [],
     seoTitle: input.seoTitle,
     seoDescription: input.seoDescription,
+    status: input.status || "draft",
+    shopifyArticleId: input.shopifyArticleId,
+    canonicalUrl: input.canonicalUrl,
+    publishedAt: input.publishedAt,
     createdAt: input.createdAt || new Date().toISOString()
   };
   const db = await getDb();

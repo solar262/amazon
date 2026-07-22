@@ -11,6 +11,9 @@ export function AdminClient({ products, articles }: { products: Product[]; artic
   const [asin, setAsin] = useState("");
   const [topic, setTopic] = useState("");
   const [draft, setDraft] = useState<DraftResponse | null>(null);
+  const [autopilotMode, setAutopilotMode] = useState<"draft" | "publish">("draft");
+  const [candidatesJson, setCandidatesJson] = useState('[{"title":"Example product","sourceUrl":"https://www.amazon.de","category":"General"}]');
+  const [metrics, setMetrics] = useState<{ outboundClicks?: number; outboundClicks7d?: number } | null>(null);
 
   async function saveProduct() {
     setStatus("Saving product...");
@@ -49,6 +52,58 @@ export function AdminClient({ products, articles }: { products: Product[]; artic
     setStatus(res.ok ? "Article saved. Refresh to see it." : "Article save failed.");
   }
 
+  async function runAutopilot() {
+    setStatus("Running autopilot...");
+    const res = await fetch("/api/control/run", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-admin-password": password },
+      body: JSON.stringify({ topic, mode: autopilotMode })
+    });
+    const data = await res.json();
+    setStatus(res.ok ? `Autopilot complete: ${data.articleSlug}` : data.error || "Autopilot failed.");
+  }
+
+  async function syncShopify() {
+    setStatus("Syncing Shopify products...");
+    const res = await fetch("/api/shopify/sync-products", {
+      method: "POST",
+      headers: { "x-admin-password": password }
+    });
+    const data = await res.json();
+    setStatus(res.ok ? `Imported ${data.imported || 0} products from Shopify.` : data.error || "Sync failed.");
+  }
+
+  async function discoverProducts() {
+    setStatus("Running discovery...");
+    let candidates: unknown[] = [];
+    try {
+      candidates = JSON.parse(candidatesJson);
+    } catch {
+      setStatus("Invalid discovery JSON.");
+      return;
+    }
+    const res = await fetch("/api/control/discover", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-admin-password": password },
+      body: JSON.stringify({ candidates })
+    });
+    const data = await res.json();
+    setStatus(res.ok ? `Discovery saved: ${data.accepted} accepted, ${data.rejected} rejected.` : data.error || "Discovery failed.");
+  }
+
+  async function loadMetrics() {
+    const res = await fetch("/api/control/metrics", {
+      headers: { "x-admin-password": password }
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setStatus(data.error || "Failed loading metrics.");
+      return;
+    }
+    setMetrics({ outboundClicks: data.outboundClicks, outboundClicks7d: data.outboundClicks7d });
+    setStatus("Metrics loaded.");
+  }
+
   return (
     <div className="admin-panel">
       <div className="form-grid">
@@ -58,10 +113,27 @@ export function AdminClient({ products, articles }: { products: Product[]; artic
         <label>ASIN<input value={asin} onChange={(e) => setAsin(e.target.value)} placeholder="Optional" /></label>
         <div className="admin-actions full"><button className="button primary" onClick={saveProduct}>Save product</button></div>
         <label className="full">Article topic<textarea value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="Example: best bathroom upgrades for small homes" /></label>
-        <div className="admin-actions full"><button className="button primary" onClick={makeDraft}>Generate draft</button>{draft && <button className="button ghost" onClick={saveDraft}>Save draft</button>}</div>
+        <div className="admin-actions full">
+          <button className="button primary" onClick={makeDraft}>Generate draft</button>
+          {draft && <button className="button ghost" onClick={saveDraft}>Save draft</button>}
+        </div>
+        <label>Autopilot mode
+          <select value={autopilotMode} onChange={(e) => setAutopilotMode((e.target.value as "draft" | "publish"))}>
+            <option value="draft">Draft</option>
+            <option value="publish">Publish</option>
+          </select>
+        </label>
+        <div className="admin-actions full">
+          <button className="button primary" onClick={runAutopilot}>Run autopilot</button>
+          <button className="button ghost" onClick={syncShopify}>Sync Shopify products</button>
+          <button className="button ghost" onClick={loadMetrics}>Load metrics</button>
+        </div>
+        <label className="full">Discovery candidates JSON<textarea value={candidatesJson} onChange={(e) => setCandidatesJson(e.target.value)} /></label>
+        <div className="admin-actions full"><button className="button ghost" onClick={discoverProducts}>Run discovery import</button></div>
       </div>
       {status && <p>{status}</p>}
       {draft && <div className="card-body"><h2>{draft.title}</h2><p>{draft.excerpt}</p><textarea value={draft.bodyHtml} onChange={(e) => setDraft({ ...draft, bodyHtml: e.target.value })} /></div>}
+      {metrics && <p className="label">Outbound clicks: {metrics.outboundClicks} | Last 7 days: {metrics.outboundClicks7d}</p>}
       <p className="label">Current products: {products.length} | Current articles: {articles.length}</p>
     </div>
   );
