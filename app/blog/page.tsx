@@ -1,8 +1,9 @@
 import { getArticles } from "@/lib/store";
 import { ArticleCard } from "@/components/ArticleCard";
+import { DEFAULT_TENANT_ID } from "@/lib/tenant";
 
 export default async function BlogPage() {
-  const articles = await getArticles();
+  const articles = await getArticles(DEFAULT_TENANT_ID);
   return (
     <div>
       <section className="section">

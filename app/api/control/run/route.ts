@@ -3,6 +3,7 @@ import { generateDraft } from "@/lib/ai";
 import { fail, getRequestId, logEvent, ok } from "@/lib/api";
 import { getProducts, saveArticle, setArticlePublished } from "@/lib/store";
 import { validateDraftInput } from "@/lib/validation";
+import { ensureTenantId } from "@/lib/tenant";
 
 function parseInput(input: unknown) {
   const body = (input || {}) as Record<string, unknown>;
@@ -16,6 +17,8 @@ function parseInput(input: unknown) {
 
 export async function POST(request: Request) {
   const requestId = getRequestId(request);
+  const tenant = ensureTenantId(request, requestId);
+  if ("error" in tenant) return tenant.error;
   if (!adminAllowed(request)) {
     logEvent("warn", "control.run.unauthorized", requestId);
     return fail(requestId, { code: "unauthorized", message: "Unauthorized request." }, 401);
@@ -29,7 +32,7 @@ export async function POST(request: Request) {
       return fail(requestId, { code: "validation_error", message: "Invalid run payload.", details: draftValidation.errors }, 400);
     }
 
-    const availableProducts = await getProducts({ includeUnpublished: true });
+    const availableProducts = await getProducts(tenant.tenantId, { includeUnpublished: true });
     const selectedProducts = parsedInput.productSlugs.length
       ? availableProducts.filter((product) => parsedInput.productSlugs.includes(product.slug))
       : availableProducts.slice(0, 6);
@@ -44,19 +47,20 @@ export async function POST(request: Request) {
       }))
     );
 
-    const article = await saveArticle({
+    const article = await saveArticle(tenant.tenantId, {
       ...draft,
       productSlugs: selectedProducts.map((product) => product.slug),
       published: parsedInput.publish
     });
 
-    const finalArticle = parsedInput.publish ? await setArticlePublished(article.slug, true) : article;
+    const finalArticle = parsedInput.publish ? await setArticlePublished(tenant.tenantId, article.slug, true) : article;
     if (!finalArticle) {
       return fail(requestId, { code: "server_error", message: "Failed to finalize article publication." }, 500);
     }
 
     logEvent("info", "control.run.success", requestId, {
       topic: parsedInput.topic,
+      tenantId: tenant.tenantId,
       products: selectedProducts.length,
       articleSlug: finalArticle.slug,
       published: parsedInput.publish

@@ -2,9 +2,12 @@ import { adminAllowed } from "@/lib/admin";
 import { fail, getRequestId, logEvent, ok } from "@/lib/api";
 import { generateDraft } from "@/lib/ai";
 import { validateDraftInput } from "@/lib/validation";
+import { ensureTenantId } from "@/lib/tenant";
 
 export async function POST(request: Request) {
   const requestId = getRequestId(request);
+  const tenant = ensureTenantId(request, requestId);
+  if ("error" in tenant) return tenant.error;
   if (!adminAllowed(request)) {
     logEvent("warn", "draft.generate.unauthorized", requestId);
     return fail(requestId, { code: "unauthorized", message: "Unauthorized request." }, 401);
@@ -16,7 +19,7 @@ export async function POST(request: Request) {
       return fail(requestId, { code: "validation_error", message: "Invalid draft payload.", details: parsed.errors }, 400);
     }
     const draft = await generateDraft(parsed.topic, parsed.products);
-    logEvent("info", "draft.generate.success", requestId, { topic: parsed.topic, products: parsed.products.length });
+    logEvent("info", "draft.generate.success", requestId, { tenantId: tenant.tenantId, topic: parsed.topic, products: parsed.products.length });
     return ok(requestId, draft, 200);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Draft generation failed.";

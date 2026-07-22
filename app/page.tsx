@@ -2,10 +2,11 @@ import Link from "next/link";
 import { getProducts, getArticles } from "@/lib/store";
 import { ProductCard } from "@/components/ProductCard";
 import { ArticleCard } from "@/components/ArticleCard";
+import { DEFAULT_TENANT_ID } from "@/lib/tenant";
 
 export default async function HomePage() {
-  const products = await getProducts();
-  const articles = await getArticles();
+  const products = await getProducts(DEFAULT_TENANT_ID);
+  const articles = await getArticles(DEFAULT_TENANT_ID);
   const topProducts = products.slice(0, 3);
   const topArticles = articles.slice(0, 3);
 

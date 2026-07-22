@@ -2,9 +2,10 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getProductBySlug } from "@/lib/store";
 import { trackedUrl } from "@/lib/tracking";
+import { DEFAULT_TENANT_ID } from "@/lib/tenant";
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
-  const product = await getProductBySlug(params.slug);
+  const product = await getProductBySlug(DEFAULT_TENANT_ID, params.slug);
   if (!product) notFound();
   return (
     <article className="section content">

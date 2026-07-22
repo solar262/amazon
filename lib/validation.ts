@@ -69,3 +69,53 @@ export function validateDraftInput(input: unknown) {
     : [];
   return { topic, products, errors: topic ? [] : ["topic is required"] };
 }
+
+export function validateTenantInput(input: unknown) {
+  const body = (input || {}) as Record<string, unknown>;
+  const name = typeof body.name === "string" ? body.name.trim() : "";
+  const errors: string[] = [];
+  if (!name) errors.push("name is required");
+  return {
+    errors,
+    value: {
+      id: typeof body.id === "string" ? body.id : undefined,
+      name,
+      brand: typeof body.brand === "object" && body.brand ? body.brand as Record<string, unknown> : undefined,
+      connectors: typeof body.connectors === "object" && body.connectors ? body.connectors as Record<string, unknown> : undefined,
+      automationRules: typeof body.automationRules === "object" && body.automationRules ? body.automationRules as Record<string, unknown> : undefined,
+      active: typeof body.active === "boolean" ? body.active : undefined
+    }
+  };
+}
+
+export function validateAutomationRunInput(input: unknown) {
+  const body = (input || {}) as Record<string, unknown>;
+  const leadId = typeof body.leadId === "string" ? body.leadId.trim() : "";
+  const errors: string[] = [];
+  if (!leadId) errors.push("leadId is required");
+  return {
+    errors,
+    value: {
+      leadId,
+      source: typeof body.source === "string" ? body.source : undefined,
+      value: typeof body.value === "number" ? body.value : undefined
+    }
+  };
+}
+
+export function validateRefundInput(input: unknown) {
+  const body = (input || {}) as Record<string, unknown>;
+  const orderId = typeof body.orderId === "string" ? body.orderId.trim() : "";
+  const customerEmail = typeof body.customerEmail === "string" ? body.customerEmail.trim() : "";
+  const reason = typeof body.reason === "string" ? body.reason.trim() : "";
+  const amount = typeof body.amount === "number" ? body.amount : Number(body.amount);
+  const errors: string[] = [];
+  if (!orderId) errors.push("orderId is required");
+  if (!customerEmail) errors.push("customerEmail is required");
+  if (!reason) errors.push("reason is required");
+  if (!Number.isFinite(amount) || amount <= 0) errors.push("amount must be a positive number");
+  return {
+    errors,
+    value: { orderId, customerEmail, reason, amount }
+  };
+}

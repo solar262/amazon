@@ -33,6 +33,7 @@ npm run start
 - `NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG` or `AMAZON_ASSOCIATE_TAG`
 - `AI_MODEL` (defaults to `gpt-4o-mini`)
 - `AI_BASE_URL` (defaults to `https://api.openai.com/v1`, supports OpenAI-compatible providers)
+- `DEFAULT_TENANT_ID` (defaults to `tenant-main`)
 
 ## External control contract (outside nerve system)
 
@@ -69,6 +70,14 @@ Provide one of:
 
 If `ADMIN_PASSWORD` is not configured, authenticated write/control endpoints are denied in production.
 
+### Multi-tenant scoping
+
+- Business APIs are tenant-scoped and accept tenant context through either:
+  - `x-tenant-id: <tenant-id>` header
+  - `?tenantId=<tenant-id>` query parameter
+- If omitted, tenant defaults to `DEFAULT_TENANT_ID` (or `tenant-main`).
+- Product/article content, automation runs, refund queues, and KPI snapshots are isolated per tenant.
+
 ### Endpoints
 
 - `GET /api/health`
@@ -103,6 +112,17 @@ If `ADMIN_PASSWORD` is not configured, authenticated write/control endpoints are
     ```json
     { "topic": "best compact espresso machines", "productSlugs": ["slug-a", "slug-b"], "publish": true }
     ```
+- `GET /api/tenants` / `POST /api/tenants` (authenticated)
+  - List or upsert tenant business profiles, connector settings, and automation rules.
+- `GET /api/automation/run` / `POST /api/automation/run` (authenticated)
+  - Read or execute modular automation stages (lead intake, scoring, follow-up, checkout, fulfillment, support triage).
+  - Supports `idempotency-key` header for retry safety.
+- `GET /api/refunds` / `POST /api/refunds` (authenticated)
+  - Read or enqueue refund requests with AI recommendation (`approve`, `deny`, `manual_review`).
+- `POST /api/refunds/authorize` (authenticated)
+  - Human-in-loop endpoint for final refund decision (`authorized` or `denied`) with audit trail.
+- `GET /api/kpis` (authenticated)
+  - Returns per-tenant KPI snapshot: CAC, conversion rate, LTV, refund rate, chargeback rate.
 
 ### Retry and idempotency guidance
 

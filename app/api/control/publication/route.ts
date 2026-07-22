@@ -1,9 +1,12 @@
 import { adminAllowed } from "@/lib/admin";
 import { fail, getRequestId, logEvent, ok } from "@/lib/api";
 import { setArticlePublished, setProductPublished } from "@/lib/store";
+import { ensureTenantId } from "@/lib/tenant";
 
 export async function POST(request: Request) {
   const requestId = getRequestId(request);
+  const tenant = ensureTenantId(request, requestId);
+  if ("error" in tenant) return tenant.error;
   if (!adminAllowed(request)) {
     logEvent("warn", "publication.update.unauthorized", requestId);
     return fail(requestId, { code: "unauthorized", message: "Unauthorized request." }, 401);
@@ -23,13 +26,14 @@ export async function POST(request: Request) {
     }
     const updated =
       body.resourceType === "product"
-        ? await setProductPublished(body.slug, body.published)
-        : await setArticlePublished(body.slug, body.published);
+        ? await setProductPublished(tenant.tenantId, body.slug, body.published)
+        : await setArticlePublished(tenant.tenantId, body.slug, body.published);
     if (!updated) {
       return fail(requestId, { code: "not_found", message: "Resource not found." }, 404);
     }
     logEvent("info", "publication.update.success", requestId, {
       resourceType: body.resourceType,
+      tenantId: tenant.tenantId,
       slug: body.slug,
       published: body.published
     });

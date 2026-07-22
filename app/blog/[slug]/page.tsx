@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
 import { getArticleBySlug, getProducts } from "@/lib/store";
 import { ProductCard } from "@/components/ProductCard";
+import { DEFAULT_TENANT_ID } from "@/lib/tenant";
 
 export default async function ArticlePage({ params }: { params: { slug: string } }) {
-  const article = await getArticleBySlug(params.slug);
+  const article = await getArticleBySlug(DEFAULT_TENANT_ID, params.slug);
   if (!article) notFound();
-  const products = await getProducts();
+  const products = await getProducts(DEFAULT_TENANT_ID);
   const related = products.filter((product) => article.productSlugs.includes(product.slug));
   return (
     <div>

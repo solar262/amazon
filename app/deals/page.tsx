@@ -1,8 +1,9 @@
 import { getProducts } from "@/lib/store";
 import { ProductCard } from "@/components/ProductCard";
+import { DEFAULT_TENANT_ID } from "@/lib/tenant";
 
 export default async function DealsPage() {
-  const products = await getProducts();
+  const products = await getProducts(DEFAULT_TENANT_ID);
   return (
     <div>
       <section className="section">

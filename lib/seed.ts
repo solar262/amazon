@@ -3,6 +3,7 @@ import type { Product, Article } from "./types";
 export const seedProducts: Product[] = [
   {
     id: "p1",
+    tenantId: "tenant-main",
     slug: "motion-sensor-light",
     title: "Motion Sensor Light",
     category: "Home",
@@ -17,6 +18,7 @@ export const seedProducts: Product[] = [
   },
   {
     id: "p2",
+    tenantId: "tenant-main",
     slug: "bathroom-seat",
     title: "Bathroom Seat",
     category: "Bathroom",
@@ -31,6 +33,7 @@ export const seedProducts: Product[] = [
   },
   {
     id: "p3",
+    tenantId: "tenant-main",
     slug: "bedside-rail",
     title: "Bedside Rail",
     category: "Bedroom",
@@ -48,6 +51,7 @@ export const seedProducts: Product[] = [
 export const seedArticles: Article[] = [
   {
     id: "a1",
+    tenantId: "tenant-main",
     slug: "simple-home-checklist",
     title: "Simple Home Checklist",
     excerpt: "A practical room-by-room checklist for useful home upgrades.",
