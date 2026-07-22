@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   }
 
   const result = await checkShopifyConnection();
-  if (!result.ok) {
+  if (result.ok === false) {
     return NextResponse.json({ ok: false, error: result.error }, { status: 500 });
   }
 
