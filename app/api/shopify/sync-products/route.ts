@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { adminError } from "@/lib/admin";
+import { automationOrAdminError } from "@/lib/admin";
 import { pullShopifyProducts } from "@/lib/shopify";
 import { saveProduct } from "@/lib/store";
 
 export async function POST(request: Request) {
-  const error = adminError(request);
+  const error = automationOrAdminError(request);
   if (error) return NextResponse.json({ error }, { status: 401 });
   try {
     const products = await pullShopifyProducts();

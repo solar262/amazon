@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminError } from "@/lib/admin";
+import { automationOrAdminError } from "@/lib/admin";
 import { getProducts } from "@/lib/store";
 import { affiliateUrl } from "@/lib/affiliate";
 
@@ -17,7 +17,7 @@ async function checkOne(url: string) {
 }
 
 export async function GET(request: Request) {
-  const error = adminError(request);
+  const error = automationOrAdminError(request);
   if (error) return NextResponse.json({ error }, { status: 401 });
   const products = await getProducts();
   const checks = await Promise.all(

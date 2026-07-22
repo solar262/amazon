@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { adminError } from "@/lib/admin";
+import { automationOrAdminError } from "@/lib/admin";
 import { evaluateCandidates } from "@/lib/discovery";
 import { getProducts, saveProduct } from "@/lib/store";
 
 export async function POST(request: Request) {
-  const error = adminError(request);
+  const error = automationOrAdminError(request);
   if (error) return NextResponse.json({ error }, { status: 401 });
   const body = await request.json();
   const candidates = Array.isArray(body.candidates) ? body.candidates : [];

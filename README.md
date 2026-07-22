@@ -22,6 +22,7 @@ Open `/admin`.
 # security
 ADMIN_PASSWORD=change-me
 AUTOMATION_SECRET=change-me
+REFUND_AUTHORIZATION_SECRET=change-me
 
 # affiliate
 AFFILIATE_NETWORK=amazon
@@ -51,13 +52,15 @@ SHOPIFY_API_VERSION=2024-10
 ### Automation
 - `POST /api/control/run` (admin or `x-automation-secret`)
   - body: `{ "topic": "best ...", "mode": "draft" | "publish" }`
-- `POST /api/control/discover` (admin)
+- `POST /api/control/discover` (admin or `x-automation-secret`)
   - body: `{ "candidates": [{ "title": "...", "sourceUrl": "https://..." }] }`
-- `GET /api/control/link-health` (admin)
-- `GET /api/control/metrics` (admin)
+- `GET /api/control/link-health` (admin or `x-automation-secret`)
+- `GET /api/control/metrics` (admin or `x-automation-secret`)
+- `POST /api/control/refunds` (admin or `x-automation-secret` + `x-refund-authorization`)
+  - body: `{ "refundId": "...", "orderId": "...", "amount": ..., "reason": "..." }`
 
 ### Shopify
-- `POST /api/shopify/sync-products` (admin)
+- `POST /api/shopify/sync-products` (admin or `x-automation-secret`)
 
 ### Analytics
 - `POST /api/analytics/event`
@@ -67,4 +70,5 @@ SHOPIFY_API_VERSION=2024-10
 
 - Write operations require `x-admin-password` when `ADMIN_PASSWORD` is set.
 - In production, write operations fail closed when `ADMIN_PASSWORD` is missing.
-- Scheduled automation can use `x-automation-secret`.
+- Scheduled automation can use `x-automation-secret` across control workflows.
+- Refund operations additionally require `x-refund-authorization` and `REFUND_AUTHORIZATION_SECRET`.
