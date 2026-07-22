@@ -1,4 +1,6 @@
-import { NextResponse } from "next/server";
+import { adminAllowed } from "@/lib/admin";
+import { fail, getRequestId, logEvent, ok } from "@/lib/api";
+import { validateDraftInput } from "@/lib/validation";
 
 function fallback(topic: string) {
   const title = topic ? `${topic} buying guide` : "New buying guide";
@@ -12,7 +14,21 @@ function fallback(topic: string) {
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const topic = String(body.topic || "");
-  return NextResponse.json(fallback(topic));
+  const requestId = getRequestId(request);
+  if (!adminAllowed(request)) {
+    logEvent("warn", "draft.generate.unauthorized", requestId);
+    return fail(requestId, { code: "unauthorized", message: "Unauthorized request." }, 401);
+  }
+  try {
+    const body = await request.json();
+    const parsed = validateDraftInput(body);
+    if (parsed.errors.length > 0) {
+      return fail(requestId, { code: "validation_error", message: "Invalid draft payload.", details: parsed.errors }, 400);
+    }
+    const draft = fallback(parsed.topic);
+    logEvent("info", "draft.generate.success", requestId, { topic: parsed.topic });
+    return ok(requestId, draft, 200);
+  } catch {
+    return fail(requestId, { code: "server_error", message: "Draft generation failed." }, 500);
+  }
 }

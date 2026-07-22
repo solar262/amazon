@@ -10,6 +10,7 @@ export type Product = {
   summary: string;
   pros: string[];
   cons: string[];
+  published: boolean;
   asin?: string;
   sourceUrl?: string;
   createdAt?: string;
@@ -22,6 +23,7 @@ export type Article = {
   excerpt: string;
   bodyHtml: string;
   productSlugs: string[];
+  published: boolean;
   seoTitle?: string;
   seoDescription?: string;
   createdAt?: string;
@@ -33,4 +35,10 @@ export type DraftResponse = {
   bodyHtml: string;
   seoTitle: string;
   seoDescription: string;
+};
+
+export type ApiError = {
+  code: string;
+  message: string;
+  details?: string[];
 };

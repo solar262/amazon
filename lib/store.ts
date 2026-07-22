@@ -9,15 +9,17 @@ function slugify(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
 }
 
-export async function getProducts(): Promise<Product[]> {
+export async function getProducts(options?: { includeUnpublished?: boolean }): Promise<Product[]> {
   const db = await getDb();
-  if (!db) return memoryProducts;
+  const includeUnpublished = Boolean(options?.includeUnpublished);
+  if (!db) return includeUnpublished ? memoryProducts : memoryProducts.filter((product) => product.published !== false);
   const rows = await db.collection<Product>("products").find({}).sort({ createdAt: -1 }).toArray();
-  return rows.length ? rows : memoryProducts;
+  const products = rows.length ? rows : memoryProducts;
+  return includeUnpublished ? products : products.filter((product) => product.published !== false);
 }
 
-export async function getProductBySlug(slug: string) {
-  const products = await getProducts();
+export async function getProductBySlug(slug: string, options?: { includeUnpublished?: boolean }) {
+  const products = await getProducts({ includeUnpublished: Boolean(options?.includeUnpublished) });
   return products.find((product) => product.slug === slug) || null;
 }
 
@@ -34,6 +36,7 @@ export async function saveProduct(input: Partial<Product>) {
     summary: input.summary || "Product summary coming soon.",
     pros: input.pros || [],
     cons: input.cons || [],
+    published: input.published ?? true,
     asin: input.asin,
     sourceUrl: input.sourceUrl,
     createdAt: input.createdAt || new Date().toISOString()
@@ -47,15 +50,17 @@ export async function saveProduct(input: Partial<Product>) {
   return product;
 }
 
-export async function getArticles(): Promise<Article[]> {
+export async function getArticles(options?: { includeUnpublished?: boolean }): Promise<Article[]> {
   const db = await getDb();
-  if (!db) return memoryArticles;
+  const includeUnpublished = Boolean(options?.includeUnpublished);
+  if (!db) return includeUnpublished ? memoryArticles : memoryArticles.filter((article) => article.published !== false);
   const rows = await db.collection<Article>("articles").find({}).sort({ createdAt: -1 }).toArray();
-  return rows.length ? rows : memoryArticles;
+  const articles = rows.length ? rows : memoryArticles;
+  return includeUnpublished ? articles : articles.filter((article) => article.published !== false);
 }
 
-export async function getArticleBySlug(slug: string) {
-  const articles = await getArticles();
+export async function getArticleBySlug(slug: string, options?: { includeUnpublished?: boolean }) {
+  const articles = await getArticles({ includeUnpublished: Boolean(options?.includeUnpublished) });
   return articles.find((article) => article.slug === slug) || null;
 }
 
@@ -67,6 +72,7 @@ export async function saveArticle(input: Partial<Article>) {
     excerpt: input.excerpt || "Article excerpt coming soon.",
     bodyHtml: input.bodyHtml || "<p>Article body coming soon.</p>",
     productSlugs: input.productSlugs || [],
+    published: input.published ?? true,
     seoTitle: input.seoTitle,
     seoDescription: input.seoDescription,
     createdAt: input.createdAt || new Date().toISOString()
@@ -78,4 +84,28 @@ export async function saveArticle(input: Partial<Article>) {
   }
   await db.collection<Article>("articles").updateOne({ slug: article.slug }, { $set: article }, { upsert: true });
   return article;
+}
+
+export async function setProductPublished(slug: string, published: boolean) {
+  const db = await getDb();
+  if (!db) {
+    const index = memoryProducts.findIndex((product) => product.slug === slug);
+    if (index < 0) return null;
+    memoryProducts[index] = { ...memoryProducts[index], published };
+    return memoryProducts[index];
+  }
+  await db.collection<Product>("products").updateOne({ slug }, { $set: { published } });
+  return getProductBySlug(slug, { includeUnpublished: true });
+}
+
+export async function setArticlePublished(slug: string, published: boolean) {
+  const db = await getDb();
+  if (!db) {
+    const index = memoryArticles.findIndex((article) => article.slug === slug);
+    if (index < 0) return null;
+    memoryArticles[index] = { ...memoryArticles[index], published };
+    return memoryArticles[index];
+  }
+  await db.collection<Article>("articles").updateOne({ slug }, { $set: { published } });
+  return getArticleBySlug(slug, { includeUnpublished: true });
 }

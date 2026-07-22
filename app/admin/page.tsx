@@ -2,8 +2,8 @@ import { getProducts, getArticles } from "@/lib/store";
 import { AdminClient } from "./AdminClient";
 
 export default async function AdminPage() {
-  const products = await getProducts();
-  const articles = await getArticles();
+  const products = await getProducts({ includeUnpublished: true });
+  const articles = await getArticles({ includeUnpublished: true });
   return (
     <section className="section">
       <p className="eyebrow">Dashboard</p>
