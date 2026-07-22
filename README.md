@@ -24,7 +24,7 @@ npm run start
 
 - `MONGODB_URI` (required)
 - `MONGODB_DB` (optional, defaults to `storefront`)
-- `ADMIN_PASSWORD` (required for external control writes)
+- `ADMIN_PASSWORD` (required in production for authenticated write/control operations)
 - `AI_API_KEY` (required for `/api/ai/generate`)
 - `REQUIRE_PERSISTENT_STORE=true` (recommended hard enforcement)
 
@@ -66,6 +66,8 @@ Provide one of:
 - `x-admin-password: <ADMIN_PASSWORD>`
 - `x-control-token: <ADMIN_PASSWORD>`
 - `Authorization header token matching ADMIN_PASSWORD`
+
+If `ADMIN_PASSWORD` is not configured, authenticated write/control endpoints are denied in production.
 
 ### Endpoints
 
