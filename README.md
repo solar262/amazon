@@ -74,6 +74,9 @@ If `ADMIN_PASSWORD` is not configured, authenticated write/control endpoints are
 - `GET /api/health`
   - Health/readiness check for orchestrators.
   - Returns 200 when app is healthy, 503 when datastore is down in required mode.
+- `GET /api/connect`
+  - Lightweight datastore connectivity check.
+  - Returns 200 when datastore is available or optional-degraded, 503 when down in required mode.
 - `GET /api/products`
   - Returns published products.
 - `GET /api/products?includeUnpublished=true`
