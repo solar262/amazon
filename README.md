@@ -92,6 +92,12 @@ Provide one of:
     ```json
     { "resourceType": "product", "slug": "item-slug", "published": false }
     ```
+- `POST /api/control/run`
+  - Runs end-to-end topic pipeline (generate draft -> save article -> publish) in one authenticated call.
+  - Payload:
+    ```json
+    { "topic": "best compact espresso machines", "productSlugs": ["slug-a", "slug-b"], "publish": true }
+    ```
 
 ### Retry and idempotency guidance
 

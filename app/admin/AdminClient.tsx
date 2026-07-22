@@ -67,6 +67,22 @@ export function AdminClient({ products, articles }: { products: Product[]; artic
     }
   }
 
+  async function runEndToEnd() {
+    setStatus("Running end-to-end pipeline...");
+    try {
+      const res = await fetch("/api/control/run", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-admin-password": password },
+        body: JSON.stringify({ topic, productSlugs: products.slice(0, 6).map((product) => product.slug), publish: true })
+      });
+      const data = await readApiResponse(res);
+      setDraft(data.draft);
+      setStatus("Pipeline complete. Article generated, saved, and published. Refresh to see updates.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "End-to-end pipeline failed.");
+    }
+  }
+
   async function togglePublication(resourceType: "product" | "article", slug: string, published: boolean) {
     setStatus(`${published ? "Publishing" : "Unpublishing"} ${resourceType}...`);
     try {
@@ -91,7 +107,11 @@ export function AdminClient({ products, articles }: { products: Product[]; artic
         <label>ASIN<input value={asin} onChange={(e) => setAsin(e.target.value)} placeholder="Optional" /></label>
         <div className="admin-actions full"><button className="button primary" onClick={saveProduct}>Save product</button></div>
         <label className="full">Article topic<textarea value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="Example: best bathroom upgrades for small homes" /></label>
-        <div className="admin-actions full"><button className="button primary" onClick={makeDraft}>Generate draft</button>{draft && <button className="button ghost" onClick={saveDraft}>Save draft</button>}</div>
+        <div className="admin-actions full">
+          <button className="button primary" onClick={makeDraft}>Generate draft</button>
+          <button className="button primary" onClick={runEndToEnd}>Run end-to-end</button>
+          {draft && <button className="button ghost" onClick={saveDraft}>Save draft</button>}
+        </div>
       </div>
       {status && <p>{status}</p>}
       {draft && <div className="card-body"><h2>{draft.title}</h2><p>{draft.excerpt}</p><textarea value={draft.bodyHtml} onChange={(e) => setDraft({ ...draft, bodyHtml: e.target.value })} /></div>}
