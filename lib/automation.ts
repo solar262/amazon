@@ -48,7 +48,7 @@ export async function runAutomationPipeline(input: {
   ];
 
   const blockedByCheckout = !tenant.connectors.stripeSecretKey;
-  const stages = stageOrder.map((stage) => {
+  const stages: AutomationRun["stages"] = stageOrder.map((stage) => {
     const blocked = blockedByCheckout && (stage === "checkout" || stage === "fulfillment");
     return {
       stage,
