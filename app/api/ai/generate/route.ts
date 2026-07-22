@@ -54,7 +54,7 @@ async function generateDraft(topic: string, products: ProductContext[], requestI
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `******
+      authorization: "Bearer " + apiKey
     },
     body: JSON.stringify({
       model,
