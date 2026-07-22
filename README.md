@@ -25,11 +25,14 @@ npm run start
 - `MONGODB_URI` (required)
 - `MONGODB_DB` (optional, defaults to `storefront`)
 - `ADMIN_PASSWORD` (required for external control writes)
+- `AI_API_KEY` (required for `/api/ai/generate`)
 - `REQUIRE_PERSISTENT_STORE=true` (recommended hard enforcement)
 
 ### Optional environment variables
 
 - `NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG` or `AMAZON_ASSOCIATE_TAG`
+- `AI_MODEL` (defaults to `gpt-4o-mini`)
+- `AI_BASE_URL` (defaults to `https://api.openai.com/v1`, supports OpenAI-compatible providers)
 
 ## External control contract (outside nerve system)
 
@@ -82,7 +85,7 @@ Provide one of:
 - `POST /api/articles`
   - Creates/updates article (authenticated).
 - `POST /api/ai/generate`
-  - Generates draft article metadata/body from a topic (authenticated).
+  - Generates draft article metadata/body from a topic using configured LLM provider (authenticated).
 - `POST /api/control/publication`
   - Publish/unpublish products and articles (authenticated).
   - Payload:

@@ -55,5 +55,17 @@ export function validateArticleInput(input: unknown): { value?: Partial<Article>
 export function validateDraftInput(input: unknown) {
   const body = (input || {}) as Record<string, unknown>;
   const topic = typeof body.topic === "string" ? body.topic.trim() : "";
-  return { topic, errors: topic ? [] : ["topic is required"] };
+  const products = Array.isArray(body.products)
+    ? body.products
+        .filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object")
+        .map((item) => ({
+          title: typeof item.title === "string" ? item.title.trim() : "",
+          slug: typeof item.slug === "string" ? item.slug : undefined,
+          summary: typeof item.summary === "string" ? item.summary : undefined,
+          category: typeof item.category === "string" ? item.category : undefined,
+          priceLabel: typeof item.priceLabel === "string" ? item.priceLabel : undefined
+        }))
+        .filter((item) => item.title.length > 0)
+    : [];
+  return { topic, products, errors: topic ? [] : ["topic is required"] };
 }
