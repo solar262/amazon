@@ -1,11 +1,12 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Product } from "@/lib/types";
 import { trackedUrl } from "@/lib/tracking";
 
 export function ProductCard({ product }: { product: Product }) {
   return (
     <article className="card product-card">
-      <img src={product.image} alt="" />
+      <Image src={product.image} alt={product.title} width={1200} height={800} unoptimized />
       <div className="card-body">
         <p className="label">{product.badge}</p>
         <h3>{product.title}</h3>

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { getProductBySlug } from "@/lib/store";
 import { trackedUrl } from "@/lib/tracking";
 
@@ -9,7 +10,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
     <article className="section content">
       <p className="eyebrow">{product.category}</p>
       <h1>{product.title}</h1>
-      <img src={product.image} alt="" className="detail-image" />
+      <Image src={product.image} alt={product.title} className="detail-image" width={1200} height={800} unoptimized />
       <p className="hero-text">{product.summary}</p>
       <h2>Pros</h2>
       <ul>{product.pros.map((item) => <li key={item}>{item}</li>)}</ul>
