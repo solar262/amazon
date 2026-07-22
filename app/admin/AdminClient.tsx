@@ -49,6 +49,20 @@ export function AdminClient({ products, articles }: { products: Product[]; artic
     setStatus(res.ok ? "Article saved. Refresh to see it." : "Article save failed.");
   }
 
+  async function testShopifyConnection() {
+    setStatus("Checking Shopify connection...");
+    const res = await fetch("/api/shopify/connect", {
+      method: "GET",
+      headers: { "x-admin-password": password }
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setStatus(data.error || "Shopify connection failed.");
+      return;
+    }
+    setStatus(`Connected to Shopify: ${data.shopName} (${data.domain})`);
+  }
+
   return (
     <div className="admin-panel">
       <div className="form-grid">
@@ -56,7 +70,10 @@ export function AdminClient({ products, articles }: { products: Product[]; artic
         <label>Product title<input value={productTitle} onChange={(e) => setProductTitle(e.target.value)} placeholder="Product name" /></label>
         <label>Product URL<input value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} placeholder="https://..." /></label>
         <label>ASIN<input value={asin} onChange={(e) => setAsin(e.target.value)} placeholder="Optional" /></label>
-        <div className="admin-actions full"><button className="button primary" onClick={saveProduct}>Save product</button></div>
+        <div className="admin-actions full">
+          <button className="button primary" onClick={saveProduct}>Save product</button>
+          <button className="button ghost" onClick={testShopifyConnection}>Test Shopify connection</button>
+        </div>
         <label className="full">Article topic<textarea value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="Example: best bathroom upgrades for small homes" /></label>
         <div className="admin-actions full"><button className="button primary" onClick={makeDraft}>Generate draft</button>{draft && <button className="button ghost" onClick={saveDraft}>Save draft</button>}</div>
       </div>
